@@ -1,25 +1,23 @@
-# 📱 Lavender-WOA Professional Deployer
-**Automated Framework for Windows 11 on Redmi Note 7 (lavender)**
+# <img src="https://raw.githubusercontent.com/TarikSaeed/Notes/main/icons/windows.png" width="32"> CryoSlayer: Windows on ARM for Lavender
 
-![Platform](https://img.shields.io/badge/Device-Redmi%20Note%207-blue?style=for-the-badge&logo=xiaomi)
-![OS](https://img.shields.io/badge/OS-Windows%2011%20ARM-orange?style=for-the-badge&logo=windows)
-
----
-
-## 🛠 О Проекте
-Этот инструмент предназначен для автоматизированного развертывания Windows 11 на Redmi Note 7. В отличие от разрозненных скриптов, этот деплоер объединяет все этапы подготовки в один профессиональный интерфейс.
-
-### 🌟 Ключевые возможности:
-* **Интеллектуальный деплой**: Использование оптимизированного движка DISM для работы с ESD-образами.
-* **Driver Injection**: Автоматическая интеграция пакета драйверов Akershus.
-* **Step-by-Step Guide**: Интерфейс ведет пользователя от проверки загрузчика до первого запуска Windows.
-* **All-in-One**: Встроенная поддержка прошивки UEFI, TWRP и установки Magisk.
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/Mellonty-razran/Lavender-WOA-Professional-Deployer?style=for-the-badge&color=00f2ff&label=VERSION">
+  <img src="https://img.shields.io/github/stars/Mellonty-razran/Lavender-WOA-Professional-Deployer?style=for-the-badge&color=0077ff">
+  <img src="https://img.shields.io/badge/Platform-Windows_10/11-blue?style=for-the-badge&logo=windows">
+</p>
 
 ---
 
-## 🚀 Быстрый запуск (Quick Start)
+## 📖 О проекте
+**CryoSlayer** — это ультимативный инструмент для автоматизированного развертывания Windows на **Redmi Note 7 (lavender)**. Скрипт сам подготовит среду, скачает нужные драйверы и развернет систему.
 
-Чтобы запустить деплоер прямо из облака, открой **PowerShell (от имени администратора)** и вставь команду ниже:
+> [!IMPORTANT]
+> Проект использует драйверы **Akershus** и UEFI от **Renegade Project**.
+
+---
+
+## ⚡ Быстрый запуск (One-Line Installer)
+Запустите **PowerShell от имени администратора** и вставьте команду:
 
 ```powershell
-irm https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1 | iex
+irm [https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1](https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1) | iex
