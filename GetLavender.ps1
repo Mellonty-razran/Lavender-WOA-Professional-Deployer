@@ -20,19 +20,24 @@ foreach ($p in $paths) {
 
 # 2. Ссылки компонентов (ТВОИ ЛИЧНЫЕ РЕСУРСЫ)
 $links = @{
-    # Твои уже готовые файлы
-    "dism.zip"       = "https://raw.githubusercontent.com/Mellonty-razran/files/main/dism-bin.zip"
+    # Теперь названия четко как у тебя в репо
+    "dism-bin.zip"       = "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/files/dism-bin.zip"
+    "platform-tools.zip" = "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/files/platform-tools.zip"
+    "libwim-15.dll"      = "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/files/libwim-15.dll"
+    "uefi.img"           = "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/files/uefi.img"
     
-    # Сюда вставь свою ссылку, когда зальешь platform-tools в свой репо
-    "adb.zip"        = "https://raw.githubusercontent.com/Mellonty-razran/files/main/platform-tools.zip"
+    # Твой TWRP из релизов
+    "files\twrp.img"     = "https://github.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/releases/download/v1/twrp-3.7.0_9-0-lavender.img"
     
-    # Остальные зависимости (залей их к себе в репо files)
-    "libwim-15.dll"  = "https://raw.githubusercontent.com/Mellonty-razran/files/main/libwim-15.dll"
-    "woa-lavender.exe" = "https://raw.githubusercontent.com/Mellonty-razran/files/main/woa-lavender.exe"
+    # Тот самый "нож" для разделов памяти
+    "files\parted"       = "https://github.com/pali/parted-static/raw/master/out/parted-arm64"
+}
 
-    # Официальные ресурсы
-    "files\twrp.img" = "https://dl.twrp.me/lavender/twrp-3.7.0_9-0-lavender.img"
-    "files\parted"   = "https://github.com/pali/parted-static/raw/master/out/parted-arm64"
+# И в блоке распаковки тоже поправим:
+if (Test-Path "$baseDir\platform-tools.zip") {
+    Write-Host "[*] Распаковка инструментов ADB в $aDir..." -ForegroundColor Gray
+    Expand-Archive "$baseDir\platform-tools.zip" $aDir -Force
+    Remove-Item "$baseDir\platform-tools.zip"
 }
 
 $wc = New-Object System.Net.WebClient
