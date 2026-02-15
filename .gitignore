@@ -1,0 +1,7 @@
+*.img
+*.zip
+*.esd
+*.wim
+/files/
+/dismbin/
+/adb/
