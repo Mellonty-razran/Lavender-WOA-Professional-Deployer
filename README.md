@@ -22,4 +22,4 @@
 Чтобы запустить деплоер прямо из облака, открой **PowerShell (от имени администратора)** и вставь команду ниже:
 
 ```powershell
-irm [https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1](https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1) | iex
+irm https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1 | iex
