@@ -1,15 +1,12 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-$baseDir = Join-Path $HOME ".woa-lavender"
-$fDir    = Join-Path $baseDir "files"
-$dDir    = Join-Path $baseDir "dismbin"
-$aDir    = Join-Path $baseDir "adb"
+# Отключаем стандартную синюю плашку, чтобы она не мешала нашему бару
+$ProgressPreference = 'SilentlyContinue'
 
-# Создание папок
-$paths = @($baseDir, $fDir, $dDir, $aDir)
+$baseDir = Join-Path $HOME ".woa-lavender"
+$paths = @($baseDir, "$baseDir\files", "$baseDir\dismbin", "$baseDir\adb")
 foreach ($p in $paths) { if (-not (Test-Path $p)) { New-Item $p -ItemType Directory | Out-Null } }
 
-# Прямые ссылки на твои ресурсы
 $links = @{
     "platform-tools.zip" = "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/files/platform-tools.zip"
     "dism-bin.zip"       = "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/files/dism-bin.zip"
@@ -19,55 +16,52 @@ $links = @{
     "files\parted"       = "https://github.com/pali/parted-static/raw/master/out/parted-arm64"
 }
 
-# Функция отрисовки прогресс-бара (как ты просил)
-function Download-WithVisualBar {
+# Функция для отрисовки того самого бара из твоего примера
+function Download-CustomBar {
     param([string]$url, [string]$dest)
     $file = Split-Path $dest -Leaf
     $client = New-Object System.Net.WebClient
     $client.Headers.Add("User-Agent", "Mozilla/5.0")
-    $barLength = 30 
+    $width = 40 # Длина полоски
     
     $event = Register-ObjectEvent -InputObject $client -EventName DownloadProgressChanged -Action {
-        $percent = $EventArgs.ProgressPercentage
-        $totalMb = [math]::Round($EventArgs.TotalBytesToReceive / 1MB, 2)
-        $curMb   = [math]::Round($EventArgs.BytesReceived / 1MB, 2)
-        $done = [math]::Floor($percent / (100 / $barLength))
-        $left = $barLength - $done
+        $p = $EventArgs.ProgressPercentage
+        $total = [math]::Round($EventArgs.TotalBytesToReceive / 1MB, 2)
+        $cur = [math]::Round($EventArgs.BytesReceived / 1MB, 2)
+        
+        # Рисуем полоску
+        $done = [math]::Floor($p / (100 / $width))
+        $left = $width - $done
         $bar = "█" * $done + "░" * $left
-        $statusString = "`r[+] Downloading $file [$bar] $percent% ($curMb / $totalMb MB)"
-        Write-Host -NoNewline $statusString -ForegroundColor Yellow
+        
+        # Вывод строки (используем `r чтобы перезаписывать линию)
+        $msg = "`rDownloading $file [$bar] [ $cur MB / $total MB ] $p % complete"
+        Write-Host -NoNewline $msg -ForegroundColor Cyan
     }
 
     $client.DownloadFileAsync($url, $dest)
     while ($client.IsBusy) { Start-Sleep -Milliseconds 50 }
-    Write-Host "" 
+    Write-Host "" # Переход на новую строку
     Unregister-Event -SourceIdentifier $event.Name
 }
 
 Clear-Host
 Write-Host "===============================================" -ForegroundColor Cyan
-Write-Host "   ПОДГОТОВКА СРЕДЫ LAVENDER WOA              " -ForegroundColor White -BackgroundColor Blue
+Write-Host "   LAVENDER WOA: ЗАГРУЗКА КОМПОНЕНТОВ         " -ForegroundColor White -BackgroundColor Blue
 Write-Host "===============================================" -ForegroundColor Cyan
+Write-Host ""
 
-# Процесс загрузки
 foreach ($name in $links.Keys) {
     $target = Join-Path $baseDir $name
-    Download-WithVisualBar -url $links[$name] -dest $target
+    Download-CustomBar -url $links[$name] -dest $target
 }
 
-# Распаковка архивов
-Write-Host "`n[!] Распаковка системных компонентов..." -ForegroundColor Cyan
-if (Test-Path "$baseDir\platform-tools.zip") { 
-    Expand-Archive "$baseDir\platform-tools.zip" $aDir -Force
-    Remove-Item "$baseDir\platform-tools.zip" 
-}
-if (Test-Path "$baseDir\dism-bin.zip") { 
-    Expand-Archive "$baseDir\dism-bin.zip" $dDir -Force
-    Remove-Item "$baseDir\dism-bin.zip" 
-}
+Write-Host "`n[!] Распаковка..." -ForegroundColor Yellow
+if (Test-Path "$baseDir\platform-tools.zip") { Expand-Archive "$baseDir\platform-tools.zip" "$baseDir\adb" -Force; Remove-Item "$baseDir\platform-tools.zip" }
+if (Test-Path "$baseDir\dism-bin.zip") { Expand-Archive "$baseDir\dism-bin.zip" "$baseDir\dismbin" -Force; Remove-Item "$baseDir\dism-bin.zip" }
 
-Write-Host "`n>>> ВСЕ РЕСУРСЫ ГОТОВЫ. ЗАПУСК МЕНЮ... <<<" -ForegroundColor Green
-Start-Sleep -Seconds 2
+Write-Host "`n>>> ГОТОВО! ПЕРЕХОД К МЕНЮ <<<" -ForegroundColor Green
+Start-Sleep -Seconds 1
 
-# Запуск MainLavender.ps1
+# Запуск MainLavender
 irm "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/MainLavender.ps1?v=$(Get-Random)" | iex
