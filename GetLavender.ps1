@@ -22,11 +22,10 @@ function Download-Direct {
     $client = New-Object System.Net.WebClient
     $client.Headers.Add("User-Agent", "Mozilla/5.0")
     
-    # Прямой вывод в консоль через системные средства
     [System.Console]::ForegroundColor = [System.ConsoleColor]::Cyan
     [System.Console]::WriteLine("[*] Starting download: $file")
 
-    $client.DownloadFile($url, $dest) # Используем синхронную загрузку для надежности
+    $client.DownloadFile($url, $dest) 
     
     [System.Console]::ForegroundColor = [System.ConsoleColor]::Green
     [System.Console]::WriteLine("[OK] Finished: $file")
@@ -44,10 +43,8 @@ foreach ($key in $links.Keys) {
     Download-Direct -url $links[$key] -dest $target
 }
 
-# Распаковка
 [System.Console]::WriteLine("`n[!] Extracting files...")
 Expand-Archive "$baseDir\platform-tools.zip" "$baseDir\adb" -Force
 Expand-Archive "$baseDir\dism-bin.zip" "$baseDir\dismbin" -Force
 
-# Переход к меню
 irm "https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/MainLavender.ps1?v=$(Get-Random)" | iex
