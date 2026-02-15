@@ -4,7 +4,6 @@ Clear-Host
 
 $baseDir = Join-Path $HOME ".woa-lavender"
 
-# Умный поиск путей (найдет файлы, даже если они в подпапках или в корне)
 function Find-Tool {
     param([string]$folder, [string]$exe)
     $path = Get-ChildItem -Path (Join-Path $baseDir $folder) -Filter $exe -Recurse | Select-Object -ExpandProperty FullName -First 1
@@ -17,7 +16,6 @@ $dism = Find-Tool "dismbin" "dism.exe"
 $twrp = Join-Path $baseDir "files\twrp.img"
 $uefi = Join-Path $baseDir "files\uefi.img"
 
-# --- ДИСКЛЕЙМЕР ---
 Write-Host "===============================================================" -ForegroundColor Red
 Write-Host "                !!! ВНИМАНИЕ: ДИСКЛЕЙМЕР !!!" -ForegroundColor White -BackgroundColor Red
 Write-Host "===============================================================" -ForegroundColor Red
