@@ -1,2 +1,25 @@
-# Lavender-WOA-Professional-Deployer
-A robust, automated deployment framework for running Windows 11 ARM64 on Redmi Note 7 (lavender). Engineered for stability and performance
+# 📱 Lavender-WOA Professional Deployer
+**Automated Framework for Windows 11 on Redmi Note 7 (lavender)**
+
+![Platform](https://img.shields.io/badge/Device-Redmi%20Note%207-blue?style=for-the-badge&logo=xiaomi)
+![OS](https://img.shields.io/badge/OS-Windows%2011%20ARM-orange?style=for-the-badge&logo=windows)
+
+---
+
+## 🛠 О Проекте
+Этот инструмент предназначен для автоматизированного развертывания Windows 11 на Redmi Note 7. В отличие от разрозненных скриптов, этот деплоер объединяет все этапы подготовки в один профессиональный интерфейс.
+
+### 🌟 Ключевые возможности:
+* **Интеллектуальный деплой**: Использование оптимизированного движка DISM для работы с ESD-образами.
+* **Driver Injection**: Автоматическая интеграция пакета драйверов Akershus.
+* **Step-by-Step Guide**: Интерфейс ведет пользователя от проверки загрузчика до первого запуска Windows.
+* **All-in-One**: Встроенная поддержка прошивки UEFI, TWRP и установки Magisk.
+
+---
+
+## 🚀 Быстрый запуск (Quick Start)
+
+Чтобы запустить деплоер прямо из облака, открой **PowerShell (от имени администратора)** и вставь команду ниже:
+
+```powershell
+irm [https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1](https://raw.githubusercontent.com/Mellonty-razran/Lavender-WOA-Professional-Deployer/main/GetLavender.ps1) | iex
