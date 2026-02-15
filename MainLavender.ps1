@@ -3,9 +3,19 @@ $ProgressPreference = 'SilentlyContinue'
 Clear-Host
 
 $baseDir = Join-Path $HOME ".woa-lavender"
-$adb = "$baseDir\adb\platform-tools\adb.exe"
-$fastboot = "$baseDir\adb\platform-tools\fastboot.exe"
-$dism = "$baseDir\dismbin\dism.exe"
+
+# Умный поиск путей (найдет файлы, даже если они в подпапках или в корне)
+function Find-Tool {
+    param([string]$folder, [string]$exe)
+    $path = Get-ChildItem -Path (Join-Path $baseDir $folder) -Filter $exe -Recurse | Select-Object -ExpandProperty FullName -First 1
+    return $path
+}
+
+$adb = Find-Tool "adb" "adb.exe"
+$fastboot = Find-Tool "adb" "fastboot.exe"
+$dism = Find-Tool "dismbin" "dism.exe"
+$twrp = Join-Path $baseDir "files\twrp.img"
+$uefi = Join-Path $baseDir "files\uefi.img"
 
 # --- ДИСКЛЕЙМЕР ---
 Write-Host "===============================================================" -ForegroundColor Red
@@ -15,13 +25,11 @@ Write-Host " Все действия вы выполняете на свой с�
 Write-Host " Автор скрипта и администрация 4PDA не несут ответственности за"
 Write-Host " окирпиченные устройства, сгоревшие флешки или потерю данных."
 Write-Host "===============================================================" -ForegroundColor Red
-$confirm = Read-Host "Введите 'YES' (английскими буквами), чтобы продолжить"
+Write-Host " Скрины работы скоро будут (возможно), проект в активной бете."
+Write-Host "===============================================================" -ForegroundColor Yellow
+$confirm = Read-Host "Введите 'YES', чтобы продолжить"
 
-if ($confirm -ne "YES") { 
-    Write-Host "Выход из соображений безопасности..." -ForegroundColor Yellow
-    Start-Sleep -Seconds 2
-    exit 
-}
+if ($confirm -ne "YES") { exit }
 
 function Show-Header {
     Clear-Host
@@ -33,10 +41,10 @@ function Show-Header {
 while($true) {
     Show-Header
     Write-Host ""
-    Write-Host " [1] ПРОВЕРКА СТАТУСА" -ForegroundColor Yellow
+    Write-Host " [1] ПРОВЕРКА СТАТУСА (ADB/Fastboot)" -ForegroundColor Yellow
     Write-Host " [2] ПРОШИТЬ TWRP"
     Write-Host " [3] ЗАГРУЗИТЬ UEFI (BOOT)"
-    Write-Host " [4] РАЗМЕТКА ПАМЯТИ (PARTED)"
+    Write-Host " [4] ИНФО О РАЗДЕЛАХ (PARTED)"
     Write-Host " [5] УСТАНОВКА WINDOWS (WIM/ESD)" -ForegroundColor Green
     Write-Host " [6] ВЫХОД"
     Write-Host ""
@@ -47,25 +55,22 @@ while($true) {
         "1" {
             Show-Header
             Write-Host "`n>>> ИНСТРУКЦИЯ:" -ForegroundColor Cyan
-            Write-Host "1. Подключите телефон к ПК."
-            Write-Host "2. Включите 'Отладку по USB' в меню разработчика (для ADB)."
-            Write-Host "3. Или переведите в Fastboot (Громкость вниз + Питание)."
+            Write-Host "Для ADB: Включите отладку по USB в системе."
+            Write-Host "Для Fastboot: Зажмите [Громкость Вниз + Питание] на выключенном ТВ."
             Write-Host "`n--- РЕЗУЛЬТАТ ---" -ForegroundColor Yellow
-            Write-Host "ADB устройства:"
-            & $adb devices
-            Write-Host "Fastboot устройства:"
-            & $fastboot devices
-            Read-Host "`nНажмите Enter для возврата..."
+            if ($adb) { Write-Host "ADB:"; & $adb devices }
+            if ($fastboot) { Write-Host "Fastboot:"; & $fastboot devices }
+            Read-Host "`nНажмите Enter..."
         }
         
         "2" {
             Show-Header
             Write-Host "`n>>> ИНСТРУКЦИЯ:" -ForegroundColor Cyan
-            Write-Host "1. Переведите телефон в режим FASTBOOT (Заяц в шапке)."
-            Write-Host "2. Убедитесь, что статус в п.1 показывает серийный номер."
-            Write-Host "`nНачинаю прошивку TWRP..." -ForegroundColor Magenta
-            & $fastboot flash recovery "$baseDir\files\twrp.img"
-            Write-Host "`nГотово! Зажмите [Громкость Вверх + Питание] для входа в TWRP." -ForegroundColor Green
+            Write-Host "1. Переведите телефон в режим FASTBOOT (заяц)."
+            if ($fastboot -and (Test-Path $twrp)) {
+                & $fastboot flash recovery $twrp
+                Write-Host "`nГотово! Зажмите [Громкость Вверх + Питание] для входа." -ForegroundColor Green
+            } else { Write-Host "Ошибка: Файлы не найдены!" -ForegroundColor Red }
             Read-Host "`nНажмите Enter..."
         }
 
@@ -73,9 +78,10 @@ while($true) {
             Show-Header
             Write-Host "`n>>> ИНСТРУКЦИЯ:" -ForegroundColor Cyan
             Write-Host "1. Телефон должен быть в режиме FASTBOOT."
-            Write-Host "2. Эта команда НЕ прошивает UEFI, а только запускает его один раз."
-            Write-Host "`nЗагрузка UEFI..." -ForegroundColor Green
-            & $fastboot boot "$baseDir\files\uefi.img"
+            if ($fastboot -and (Test-Path $uefi)) {
+                & $fastboot boot $uefi
+                Write-Host "`nЗагрузка UEFI..." -ForegroundColor Green
+            } else { Write-Host "Ошибка: Файлы не найдены!" -ForegroundColor Red }
             Read-Host "`nНажмите Enter..."
         }
 
@@ -83,30 +89,26 @@ while($true) {
             Show-Header
             Write-Host "`n>>> ИНСТРУКЦИЯ:" -ForegroundColor Cyan
             Write-Host "1. Зайдите в TWRP на телефоне."
-            Write-Host "2. Перейдите в Advanced -> ADB Sideload (или просто оставьте в меню)."
-            Write-Host "3. Скрипт попытается прочитать таблицу разделов."
+            Write-Host "2. Убедитесь, что кабель подключен."
             Write-Host "`n--- ТАБЛИЦА РАЗДЕЛОВ ---" -ForegroundColor Yellow
-            & $adb shell "chmod +x /sdcard/parted && /sdcard/parted /dev/block/sda print"
-            Write-Host "`nЕсли пусто — проверьте соединение ADB!" -ForegroundColor Red
+            if ($adb) { & $adb shell "chmod +x /sdcard/parted && /sdcard/parted /dev/block/sda print" }
             Read-Host "`nНажмите Enter..."
         }
 
         "5" {
             Show-Header
-            Write-Host "`n>>> ИНСТРУКЦИЯ (ВАЖНО):" -ForegroundColor Cyan
-            Write-Host "1. В TWRP смонтируйте разделы Windows и Windows ESP как Mass Storage."
-            Write-Host "2. Или используйте скрипт монтирования в самом TWRP."
-            Write-Host "3. Узнайте букву диска в 'Моем компьютере' (например, D)."
+            Write-Host "`n>>> ИНСТРУКЦИЯ:" -ForegroundColor Cyan
+            Write-Host "1. В TWRP смонтируйте разделы как Mass Storage."
+            Write-Host "2. Узнайте букву диска Windows (например, D)."
             
-            $imgPath = Read-Host "`nПеретащите сюда файл (.wim или .esd)"
-            $imgPath = $imgPath.Trim('"')
+            $imgPath = (Read-Host "`nПеретащите сюда файл (.wim или .esd)").Trim('"')
             
             if (Test-Path $imgPath) {
                 & $dism /Get-ImageInfo /ImageFile:$imgPath
                 $index = Read-Host "`nВведите номер индекса (обычно 1)"
-                $drive = Read-Host "Введите букву диска (БЕЗ двоеточия, например D)"
+                $drive = Read-Host "Введите букву диска (например D)"
                 
-                Write-Host "`nРАЗВЕРТЫВАНИЕ ОБРАЗА... ЭТО ЗАЙМЕТ ВРЕМЯ." -ForegroundColor Magenta
+                Write-Host "`nРАЗВЕРТЫВАНИЕ ОБРАЗА... НЕ ЗАКРЫВАЙТЕ ОКНО!" -ForegroundColor Magenta
                 & $dism /Apply-Image /ImageFile:$imgPath /Index:$index /ApplyDir:$($drive + ":\") /CheckIntegrity
                 
                 if ($LASTEXITCODE -eq 0) { Write-Host "`nУСПЕШНО!" -ForegroundColor Green }
